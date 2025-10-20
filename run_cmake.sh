@@ -1,0 +1,2 @@
+#!/bin/bash
+/usr/bin/cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_C_COMPILER_LAUNCHER:STRING=ccache -DCMAKE_CXX_COMPILER_LAUNCHER:STRING=ccache -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER:FILEPATH=/usr/bin/aarch64-linux-gnu-g++ --no-warn-unused-cli -S /home/hongyangli/raspberry_pi_playground -B /home/hongyangli/raspberry_pi_playground/build -G Ninja

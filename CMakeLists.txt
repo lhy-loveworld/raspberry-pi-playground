@@ -15,7 +15,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(abseil-cpp)
 
 # 2. Define your executable
-add_executable(main main.cc)
+add_executable(main main.cc remote_control.cc)
 
 # 3. Link against the Abseil components you need
 # You link against specific targets, e.g., absl::strings,
@@ -23,6 +23,8 @@ add_executable(main main.cc)
 target_link_libraries(main PRIVATE
   # absl::strings
   # absl::flat_hash_map
+  absl::log
+  absl::status
   absl::time
   pigpio
   pthread
