@@ -21,7 +21,6 @@ int RemoteControlHandler::Init() {
       return ret;
     }
   }
-  std::cout << "Remote Control Handler initialized successfully." << std::endl;
   return 0;
 }
 
