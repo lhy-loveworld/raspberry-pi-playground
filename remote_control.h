@@ -30,7 +30,7 @@ class RemoteControlHandler {
                         {throttle_pin, Channel::THROTTLE},
                         {yaw_pin, Channel::YAW}} {}
 
-  ~RemoteControlHandler() { gpioTerminate(); }
+  ~RemoteControlHandler() = default;
 
  private:
   // Static wrapper for C style callback.

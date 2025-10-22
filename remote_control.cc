@@ -7,19 +7,21 @@
 
 namespace rpi {
 int RemoteControlHandler::Init() {
-  if (gpioInitialise() < 0) {
-    std::cerr
-        << "Failed to initialize pigpio. Is the pigpiod daemon running? Try "
-           "running: sudo systemctl start pigpiod"
-        << std::endl;
-    return -1;
-  }
-  std::cout << "pigpio initialized successfully." << std::endl;
   for (const auto& [channel, pin] : channel_to_pin_) {
-    gpioSetMode(pin, PI_INPUT);
-    gpioSetAlertFuncEx(pin, WrapperOnEdge, this);
+    int ret = gpioSetMode(pin, PI_INPUT);
+    if (ret != 0) {
+      std::cerr << "gpioSetMode failed for pin " << pin << " and channel "
+                << static_cast<int>(channel) << std::endl;
+      return ret;
+    }
+    ret = gpioSetAlertFuncEx(pin, WrapperOnEdge, this);
+    if (ret != 0) {
+      std::cerr << "gpioSetAlertFuncEx failed for pin " << pin << " and channel "
+                << static_cast<int>(channel) << std::endl;
+      return ret;
+    }
   }
-
+  std::cout << "Remote Control Handler initialized successfully." << std::endl;
   return 0;
 }
 

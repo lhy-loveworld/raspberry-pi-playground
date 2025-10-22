@@ -1,5 +1,6 @@
 #include <atomic>
 #include <chrono>
+#include <cstdlib>
 #include <csignal>
 #include <format>
 #include <iostream>
@@ -38,10 +39,19 @@ void PrintChannelOutput(const rpi::RemoteControlHandler& rc_handler) {
 
 int main(int argc, char* argv[]) {
   std::cout << "Program started. Use Ctrl+C to exit..." << std::endl;
+  if (int ret = gpioInitialise(); ret < 0) {
+    std::cerr
+        << "Failed to initialize pigpio. Is the pigpiod daemon running? Try "
+           "running: sudo systemctl start pigpiod"
+        << std::endl;
+    return ret;
+  }
+  std::cout << "pigpio initialized successfully." << std::endl;
+  atexit(gpioTerminate);
   rpi::RemoteControlHandler rc_handler(kCh1Pin, kCh2Pin, kCh3Pin, kCh4Pin);
-  if (rc_handler.Init() != 0) {
+  if (int ret = rc_handler.Init(); ret != 0) {
     std::cerr << "Failed to initialize Remote Control Handler." << std::endl;
-    return -1;
+    return ret;
   };
   signal(SIGINT, SignalHandler);
   do {
