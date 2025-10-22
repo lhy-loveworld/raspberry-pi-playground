@@ -1,38 +1,54 @@
 #ifndef REMOTE_CONTROL_H_
 #define REMOTE_CONTROL_H_
 
-#include <array>
-#include <atomic>
-
 #include <pigpio.h>
 
-#include "absl/status/status.h"
+#include <array>
+#include <atomic>
+#include <unordered_map>
 
 namespace rpi {
+
+enum class Channel { ROLL = 1, PITCH = 2, THROTTLE = 3, YAW = 4 };
+
 // A handler to process the channels from FS-T6 remote controller.
 class RemoteControlHandler {
  public:
-  absl::Status Init();
+  int Init();
 
-  RemoteControlHandler(int ch1_pin, int ch2_pin, int ch3_pin, int ch4_pin)
-      : ch_1_pin_(ch1_pin),
-        ch_2_pin_(ch2_pin),
-        ch_3_pin_(ch3_pin),
-        ch_4_pin_(ch4_pin) {}
+  float GetChannelPulseWidthPercentage(Channel channel) const;
+
+  // Roll, Pitch, Throttle, Yaw -> Channel 1, 2, 3, 4
+  RemoteControlHandler(const int roll_pin, const int pitch_pin,
+                       const int throttle_pin, const int yaw_pin)
+      : channel_to_pin_{{Channel::ROLL, roll_pin},
+                        {Channel::PITCH, pitch_pin},
+                        {Channel::THROTTLE, throttle_pin},
+                        {Channel::YAW, yaw_pin}},
+        pin_to_channel_{{roll_pin, Channel::ROLL},
+                        {pitch_pin, Channel::PITCH},
+                        {throttle_pin, Channel::THROTTLE},
+                        {yaw_pin, Channel::YAW}} {}
 
   ~RemoteControlHandler() { gpioTerminate(); }
 
  private:
+  // Static wrapper for C style callback.
+  static void WrapperOnEdge(int pin, int level, uint32_t tick, void* user_data);
+  // Callback function for GPIO edge detection.
+  void OnEdge(int pin, int level, uint32_t tick);
+
+  static constexpr uint32_t kMinPulseWidth = 1000;
+  static constexpr uint32_t kMaxPulseWidth = 2000;
+
   // GPIO pin ID for 4 channels.
-  const int ch_1_pin_ = 1;
-  const int ch_2_pin_ = 1;
-  const int ch_3_pin_ = 1;
-  const int ch_4_pin_ = 1;
+  const std::unordered_map<Channel, int> channel_to_pin_;
+  const std::unordered_map<int, Channel> pin_to_channel_;
 
-  std::array<std::atomic<uint32_t>, 4> last_ticks_; 
+  std::array<std::atomic<uint32_t>, 4> last_ticks_{0, 0, 0, 0};
 
-  std::array<std::atomic<bool>, 4> valid_;
+  std::array<std::atomic<uint32_t>, 4> last_pulse_widths_{0, 0, 0, 0};
 };
 }  // namespace rpi
 
-#endif // REMOTE_CONTROL_H_
+#endif  // REMOTE_CONTROL_H_
