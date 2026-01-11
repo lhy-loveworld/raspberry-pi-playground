@@ -11,12 +11,31 @@ namespace rpi {
 
 enum class Channel { ROLL = 1, PITCH = 2, THROTTLE = 3, YAW = 4 };
 
+// A struct to hold the remote control data for each channel.
+// Roll, Pitch, Yaw: -1.0 to 1.0 (0.0 is center).
+// Throttle: 0.0 to 1.0 (0.0 is min).
+struct RcData {
+  float roll;
+  float pitch;
+  float throttle;
+  float yaw;
+};
+
 // A handler to process the channels from FS-T6 remote controller.
 class RemoteControlHandler {
  public:
   int Init();
 
-  float GetChannelPulseWidthPercentage(Channel channel) const;
+  RcData GetRcData() const {
+    return RcData{
+        .roll = GetChannelNormalized(Channel::ROLL),
+        .pitch = GetChannelNormalized(Channel::PITCH),
+        .throttle = GetChannelNormalized(Channel::THROTTLE),
+        .yaw = GetChannelNormalized(Channel::YAW),
+    };
+  }
+
+  float GetChannelNormalized(Channel channel) const;
 
   // Roll, Pitch, Throttle, Yaw -> Channel 1, 2, 3, 4
   RemoteControlHandler(const int roll_pin, const int pitch_pin,

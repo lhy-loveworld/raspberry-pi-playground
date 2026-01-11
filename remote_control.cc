@@ -24,13 +24,17 @@ int RemoteControlHandler::Init() {
   return 0;
 }
 
-float RemoteControlHandler::GetChannelPulseWidthPercentage(
-    Channel channel) const {
+float RemoteControlHandler::GetChannelNormalized(Channel channel) const {
   uint32_t pulse_width =
       last_pulse_widths_[static_cast<int>(channel) - 1].load();
   pulse_width = std::clamp(pulse_width, kMinPulseWidth, kMaxPulseWidth);
-  return static_cast<float>(pulse_width - kMinPulseWidth) /
-         (kMaxPulseWidth - kMinPulseWidth);
+
+  if (channel == Channel::THROTTLE) {
+    return static_cast<float>(pulse_width - kMinPulseWidth) /
+           (kMaxPulseWidth - kMinPulseWidth);
+  }
+  // For Roll, Pitch, Yaw: Map [1000, 2000] to [-1.0, 1.0]. Center is 1500.
+  return static_cast<float>(static_cast<int>(pulse_width) - 1500) / 500.0f;
 }
 
 void RemoteControlHandler::WrapperOnEdge(int pin, int level, uint32_t tick,
