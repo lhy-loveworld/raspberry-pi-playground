@@ -7,16 +7,9 @@
 #include <functional>
 #include <utility>
 
-namespace rpi {
+#include "data_structs.h"
 
-struct AccGyroData {
-  float ax;
-  float ay;
-  float az;
-  float gx;
-  float gy;
-  float gz;
-};
+namespace rpi {
 
 class SensorModuleHandler {
  public:
@@ -41,8 +34,8 @@ class SensorModuleHandler {
 
  private:
   bool LoadAccCalibration();
-  std::pair<float, float> CalculateScaleAndOffset(
-      std::function<float(const AccGyroData&)>);
+  std::pair<double, double> CalculateScaleAndOffset(
+      std::function<int16_t(const AccGyroData&)>);
   void CalibrateAcc();
   void CalibrateGyro();
 
@@ -54,16 +47,16 @@ class SensorModuleHandler {
   int mpu6050_handle_ = -1;
   int ms5611_handle_ = -1;
 
-  float ax_scale_ = 1.0f;
-  float ay_scale_ = 1.0f;
-  float az_scale_ = 1.0f;
-  float ax_offset_ = 0.0f;
-  float ay_offset_ = 0.0f;
-  float az_offset_ = 0.0f;
+  double ax_scale_ = 1.0f;
+  double ay_scale_ = 1.0f;
+  double az_scale_ = 1.0f;
+  double ax_offset_ = 0.0f;
+  double ay_offset_ = 0.0f;
+  double az_offset_ = 0.0f;
 
-  float gx_offset_ = 0.0f;
-  float gy_offset_ = 0.0f;
-  float gz_offset_ = 0.0f;
+  double gx_offset_ = 0.0f;
+  double gy_offset_ = 0.0f;
+  double gz_offset_ = 0.0f;
 };
 
 }  // namespace rpi

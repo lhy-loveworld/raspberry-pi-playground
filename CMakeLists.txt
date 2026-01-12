@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Threads REQUIRED)
 
-add_executable(main main.cc remote_control.cc remote_control.h sensor_module.cc sensor_module.h)
+add_executable(main main.cc remote_control.cc remote_control.h sensor_module.cc sensor_module.h data_structs.h)
 
 target_link_libraries(main PRIVATE
   pigpio

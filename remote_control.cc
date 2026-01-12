@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "data_structs.h"
+
 namespace rpi {
 int RemoteControlHandler::Init() {
   for (const auto& [channel, pin] : channel_to_pin_) {
@@ -16,8 +18,8 @@ int RemoteControlHandler::Init() {
     }
     ret = gpioSetAlertFuncEx(pin, WrapperOnEdge, this);
     if (ret != 0) {
-      std::cerr << "gpioSetAlertFuncEx failed for pin " << pin << " and channel "
-                << static_cast<int>(channel) << std::endl;
+      std::cerr << "gpioSetAlertFuncEx failed for pin " << pin
+                << " and channel " << static_cast<int>(channel) << std::endl;
       return ret;
     }
   }
@@ -30,11 +32,11 @@ float RemoteControlHandler::GetChannelNormalized(Channel channel) const {
   pulse_width = std::clamp(pulse_width, kMinPulseWidth, kMaxPulseWidth);
 
   if (channel == Channel::THROTTLE) {
-    return static_cast<float>(pulse_width - kMinPulseWidth) /
+    return static_cast<double>(pulse_width - kMinPulseWidth) /
            (kMaxPulseWidth - kMinPulseWidth);
   }
   // For Roll, Pitch, Yaw: Map [1000, 2000] to [-1.0, 1.0]. Center is 1500.
-  return static_cast<float>(static_cast<int>(pulse_width) - 1500) / 500.0f;
+  return static_cast<double>(static_cast<int>(pulse_width) - 1500) / 500.0;
 }
 
 void RemoteControlHandler::WrapperOnEdge(int pin, int level, uint32_t tick,

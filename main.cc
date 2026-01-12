@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 
+#include "data_structs.h"
 #include "remote_control.h"
 #include "sensor_module.h"
 

@@ -7,19 +7,11 @@
 #include <atomic>
 #include <unordered_map>
 
+#include "data_structs.h"
+
 namespace rpi {
 
 enum class Channel { ROLL = 1, PITCH = 2, THROTTLE = 3, YAW = 4 };
-
-// A struct to hold the remote control data for each channel.
-// Roll, Pitch, Yaw: -1.0 to 1.0 (0.0 is center).
-// Throttle: 0.0 to 1.0 (0.0 is min).
-struct RcData {
-  float roll;
-  float pitch;
-  float throttle;
-  float yaw;
-};
 
 // A handler to process the channels from FS-T6 remote controller.
 class RemoteControlHandler {
