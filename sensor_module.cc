@@ -36,6 +36,8 @@ int SensorModuleHandler::Init(const bool calibrate_acc) {
   static constexpr int kMpu6050GyroConfigReg = 0x1B;
   static constexpr int kMpu6050PwrMgmt1Reg = 0x6B;
   static constexpr int kMs5611Addr = 0x77;
+  // Need to enable MPU6050 I2C bypass to access HMC5883L directly.
+  static constexpr int kHmc5883lAddr = 0x1E;
 
   mpu6050_handle_ = i2cOpen(kI2cBusId, kMpu6050Addr, 0);
   if (mpu6050_handle_ < 0) {
