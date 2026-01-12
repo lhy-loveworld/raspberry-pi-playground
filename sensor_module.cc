@@ -30,9 +30,11 @@ std::string GetAccCalibFilePath() {
 int SensorModuleHandler::Init(const bool calibrate_acc) {
   static constexpr int kI2cBusId = 1;
   static constexpr int kMpu6050Addr = 0x68;
-  static constexpr int kMpu6050PwrMgmt1Reg = 0x6B;
+  static constexpr int kMpu6050SmplrtDivReg = 0x19;
+  static constexpr int kMpu6050CfgReg = 0x1A;
   static constexpr int kMpu6050AccConfigReg = 0x1C;
   static constexpr int kMpu6050GyroConfigReg = 0x1B;
+  static constexpr int kMpu6050PwrMgmt1Reg = 0x6B;
   static constexpr int kMs5611Addr = 0x77;
 
   mpu6050_handle_ = i2cOpen(kI2cBusId, kMpu6050Addr, 0);
@@ -48,19 +50,51 @@ int SensorModuleHandler::Init(const bool calibrate_acc) {
   std::cout << "MPU6050 initialized successfully." << std::endl;
 
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  ret = i2cWriteByteData(mpu6050_handle_, kMpu6050AccConfigReg,
-                         0x10);  // Accel config set to +/- 8g
+
+  // Set clock source to PLL with X axis gyroscope reference
+  ret = i2cWriteByteData(mpu6050_handle_, kMpu6050PwrMgmt1Reg, 0x01);
+  if (ret < 0) {
+    std::cerr << "Failed to set MPU6050 clock source." << std::endl;
+    return ret;
+  }
+  std::cout << "MPU6050 clock source set successfully to PLL with X axis "
+               "gyroscope reference."
+            << std::endl;
+
+  // Accel config set to +/- 8g
+  ret = i2cWriteByteData(mpu6050_handle_, kMpu6050AccConfigReg, 0x10);
   if (ret < 0) {
     std::cerr << "Failed to configure MPU6050 accelerometer." << std::endl;
     return ret;
   }
-  ret = i2cWriteByteData(mpu6050_handle_, kMpu6050GyroConfigReg,
-                         0x18);  // Gyro config set to +/- 2000 dps
+  std::cout << "MPU6050 accelerometer configured successfully to +/- 8g."
+            << std::endl;
+
+  // Gyro config set to +/- 2000 dps
+  ret = i2cWriteByteData(mpu6050_handle_, kMpu6050GyroConfigReg, 0x18);
   if (ret < 0) {
     std::cerr << "Failed to configure MPU6050 gyroscope." << std::endl;
     return ret;
   }
-  std::cout << "MPU6050 configured successfully." << std::endl;
+  std::cout << "MPU6050 configured successfully to +/- 2000 dps." << std::endl;
+
+  // Setup DLPF to 44Hz for Acc and 42Hz for Gyro
+  ret = i2cWriteByteData(mpu6050_handle_, kMpu6050CfgReg, 0x03);
+  if (ret < 0) {
+    std::cerr << "Failed to set MPU6050 DLPF." << std::endl;
+    return ret;
+  }
+  std::cout << "MPU6050 DLPF set successfully to 44Hz for Acc and 42Hz for "
+               "Gyro."
+            << std::endl;
+
+  // Set sample rate to 1kHz.
+  ret = i2cWriteByteData(mpu6050_handle_, kMpu6050SmplrtDivReg, 0x00);
+  if (ret < 0) {
+    std::cerr << "Failed to set MPU6050 sample rate." << std::endl;
+    return ret;
+  }
+  std::cout << "MPU6050 sample rate set successfully to 1kHz." << std::endl;
 
   if (!calibrate_acc) {
     if (!LoadAccCalibration()) {
